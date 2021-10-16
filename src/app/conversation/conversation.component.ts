@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../services/user.service';
 import { ConversationService } from '../services/conversation.service';
+import { MessagingService } from '../services/messaging.service';
+import { AngularFireStorage } from 'angularfire2/storage';
 
 @Component({
   selector: 'app-conversation',
@@ -18,9 +20,16 @@ export class ConversationComponent implements OnInit {
   shake = false;
   picture: any;
   friendPicture: any;
+  uploadedPicture: any;
+  currentPictureId: any;
+  my_picture: any;
+  pictureUpload: any;
   constructor(private activatedRoute: ActivatedRoute, private userService: UserService,
+              private messagingService: MessagingService, private fbStorage: AngularFireStorage,
               private conversationService: ConversationService) {
     this.me = JSON.parse(localStorage.getItem('msn_user'));
+    this.my_picture = (this.me.downloaded_picture) ? this.me.profile_picture
+      : 'https://wir.skyrock.net/wir/v1/profilcrop/?c=mog&w=301&h=301&im=%2Fart%2FPRIP.85914100.3.0.png';
     this.picture = (this.me.downloaded_picture) ? this.me.profile_picture
       : 'https://wir.skyrock.net/wir/v1/profilcrop/?c=mog&w=301&h=301&im=%2Fart%2FPRIP.85914100.3.0.png';
     this.friendId = this.activatedRoute.snapshot.params['uid'];
@@ -47,12 +56,7 @@ export class ConversationComponent implements OnInit {
               this.conversationService.updateMessage(this.ids.join('||'), m);
             }
           });
-          window.setTimeout(() => {
-            const objDiv = document.getElementById('messageArea');
-            if(objDiv) {
-              objDiv.scrollTop = objDiv.scrollHeight;
-            }
-          }, 1);
+          this.scrollToBottom();
         });
     });
   }
@@ -63,7 +67,17 @@ export class ConversationComponent implements OnInit {
       return this.me.nick;
     }
   }
-
+  scrollToBottom() {
+    window.setTimeout(() => {
+      const objDiv = document.getElementById('messageArea');
+      if(objDiv) {
+        objDiv.scrollTop = objDiv.scrollHeight;
+        window.setTimeout(() => {
+          objDiv.scrollTop = objDiv.scrollHeight;
+        }, 900);
+      }
+    }, 1);
+  }
   ngOnInit() {
   }
   doZumbido() {
@@ -94,7 +108,58 @@ export class ConversationComponent implements OnInit {
       type: 'text',
       content: this.form.message.replace(/\n$/, '')
     };
-    this.conversationService.createConversation(messageObject);
+    this.conversationService.createConversation(messageObject).then(() => {
+      const notificationMessage = {
+        type: 'text',
+        friend_uid: this.me.uid,
+        friend_name: this.me.nick,
+        picture: this.picture,
+        message: messageObject.content,
+        timestamp: Date.now() + ''
+      };
+      this.messagingService.sendMessage(this.friendId, notificationMessage);
+    });
     this.form.message = '';
+  }
+  changeListener($event): void {
+    this.readThis($event.target);
+  }
+  readThis(inputValue: any) {
+    const file: File = inputValue.files[0];
+    const myReader: FileReader = new FileReader();
+
+    myReader.onloadend = (e) => {
+      this.uploadedPicture = myReader.result;
+    };
+    myReader.readAsDataURL(file);
+  }
+  uploadPicture() {
+    this.currentPictureId = Date.now();
+    const pictures = this.fbStorage.ref('pictures/' + this.currentPictureId + '.jpg').putString(this.uploadedPicture, 'data_url');
+    pictures.then((result) => {
+      this.uploadedPicture = null;
+      this.pictureUpload = this.fbStorage.ref('pictures/' + this.currentPictureId + '.jpg').getDownloadURL();
+      this.pictureUpload.subscribe((p) => {
+        const messageObject: any = {
+          uid: this.ids.join('||'),
+          timestamp: Date.now(),
+          sender: this.me.uid,
+          receiver: this.friendId,
+          type: 'picture',
+          content: p
+        };
+        this.conversationService.createConversation(messageObject).then(() => {
+          const notificationMessage = {
+            type: 'picture',
+            friend_uid: this.me.uid,
+            friend_name: this.me.nick,
+            picture: this.my_picture,
+            message: messageObject.content,
+            timestamp: Date.now() + ''
+          };
+          this.messagingService.sendMessage(this.friendId, notificationMessage);
+        });
+      });
+    });
   }
 }

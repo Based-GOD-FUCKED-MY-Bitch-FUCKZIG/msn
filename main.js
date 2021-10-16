@@ -5,6 +5,7 @@ const url = require('url')
 let win
 
 function createWindow () {
+  //win = new BrowserWindow({width: 800, height: 600})
   win = new BrowserWindow({width: 800, height: 600})
 
   // load the dist folder from Angular
@@ -12,7 +13,7 @@ function createWindow () {
     pathname: path.join(__dirname, 'dist/msn/index.html'),
     protocol: 'file:',
     slashes: true
-  }))
+  }));
 
   // Open the DevTools optionally:
   // win.webContents.openDevTools()

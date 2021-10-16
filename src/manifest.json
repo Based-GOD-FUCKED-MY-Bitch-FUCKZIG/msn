@@ -1,0 +1,7 @@
+{
+  "short_name": "MSN Alive",
+  "name": "MSN Alive: Reviviendo al Titán",
+  "start_url": "/?utm_source=homescreen",
+
+  "gcm_sender_id": "103953800507"
+}

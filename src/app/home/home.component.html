@@ -47,8 +47,8 @@
       </div>
       <div class="col-md-12 contact-list-item" routerLink="/conversation/{{u.uid}}" *ngFor="let u of me.friends">
         <img src="assets/img/logo_live_{{u.status || 'offline'}}.png" class="status">
-        <b>{{u.nick}}</b> <i class="msnicon brb"></i>
-        <small *ngIf="u.subnick">{{u.subnick}}</small>
+        <b>{{u.nick}}</b>
+        <small *ngIf="u.subnick"> - {{u.subnick}}</small>
       </div>
     </div>
   </div>

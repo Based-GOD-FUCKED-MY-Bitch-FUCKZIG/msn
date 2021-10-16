@@ -1,5 +1,5 @@
 .conversationContainer {
-  height: 100vh;
+
 }
 #conversationMenuContainer {
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#8dd2f3+0,43b5eb+50,39abe1+51,3cb2ea+100 */
@@ -24,10 +24,14 @@
 }
 #conversationSidebar {
   padding: 30px;
+  padding-bottom: 0;
   position: relative;
 }
 .vh20 {
   height: 20vh;
+}
+.vh25 {
+  height: 25vh;
 }
 .vh30 {
   height: 30vh;
@@ -63,4 +67,10 @@
 }
 span.friendName {
   font-size: 2em;
+}
+img.conversationPicture {
+  width: 300px;
+  margin: 10px 0;
+  padding: 10px;
+  border: 2px solid #ededed;
 }

@@ -1,12 +1,40 @@
-<div id="conversationMenuContainer">
-  <div class="item" routerLink="/home">
+<div id="conversationMenuContainer" *ngIf="router.url !== '/login'">
+  <div class="item branding" routerLink="/home">
     <img src="assets/img/logo_live.png">
     MSN Alive!
   </div>
   <div class="item" routerLink="/settings">Configuración</div>
   <div class="item" routerLink="/about">Acerca De</div>
 </div>
-<router-outlet></router-outlet>
+<div class="toasterContainer" *ngIf="shouldShowNotification && notification" routerLink="conversation/{{notification.data['gcm.notification.friend_uid']}}">
+  <div class="toasterHeaderContainer">
+    <img src="assets/img/logo_live_big_clean.png">
+    MSN Alive!
+    <span class="closeToaster pull-right" (click)="shouldShowNotification = false">
+      <fa name="times"></fa>
+    </span>
+  </div>
+  <div class="toasterBodyContainer">
+    <div class="row">
+      <div class="col-md-5">
+        <div class="avatarFrameoffline marto15 marbo15">
+          <img src="{{notification.notification.icon}}" style="max-width:100px" class="avatarImage img-fluid">
+        </div>
+      </div>
+      <div class="col-md-7">
+        <br />
+        <b>{{notification.data['gcm.notification.friend_name']}}</b> dice: <br />
+        {{notification.notification.body}}
+      </div>
+    </div>
+  </div>
+</div>
+<div id="generalContent" *ngIf="router.url !== '/login'">
+  <router-outlet></router-outlet>
+</div>
+<div *ngIf="router.url === '/login'">
+  <router-outlet></router-outlet>
+</div>
 <ng-template #request let-c="close" let-d="dismiss">
   <div class="modal-header">
     <h3>Agregar Amigo</h3>
